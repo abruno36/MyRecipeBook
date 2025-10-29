@@ -47,25 +47,39 @@ public class RegisterUserUseCase : IRegisterUserUseCase
     {
         await Validate(request);
 
-        var user = _mapper.Map<Domain.Entities.User>(request);
-        user.Password = _passwordEncripter.Encrypt(request.Password);
-
-        await _writeOnlyRepository.Add(user);
-
-        await _unitOfWork.Commit();
-
-        var refreshToken = await CreateAndSaveRefreshToken(user);
-
-        return new ResponseRegisteredUserJson
+        try
         {
-            Name = user.Name,
-            Tokens = new ResponseTokensJson
+            var user = _mapper.Map<Domain.Entities.User>(request);
+            user.Password = _passwordEncripter.Encrypt(request.Password);
+
+            await _writeOnlyRepository.Add(user);
+            await _unitOfWork.Commit(); // <-- TENTA SALVAR USER
+
+            Console.WriteLine($"[DEBUG] User salvo. Id={user.Id} UserIdentifier={user.UserIdentifier}");
+
+            var refreshToken = await CreateAndSaveRefreshToken(user); // <-- TENTA SALVAR REFRESH TOKEN
+
+            Console.WriteLine($"[DEBUG] Refresh token salvo.");
+
+            return new ResponseRegisteredUserJson
             {
-                AccessToken = _accessTokenGenerator.Generate(user.UserIdentifier),
-                RefreshToken = refreshToken
-            }
-        };
+                Name = user.Name,
+                Email = user.Email,
+                Tokens = new ResponseTokensJson
+                {
+                    AccessToken = _accessTokenGenerator.Generate(user.UserIdentifier),
+                    RefreshToken = refreshToken
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[ERRO EXECUTE] " + ex.ToString());
+            throw;
+        }
     }
+
+
 
     private async Task<string> CreateAndSaveRefreshToken(Domain.Entities.User user)
     {
