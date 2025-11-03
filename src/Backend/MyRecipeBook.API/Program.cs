@@ -121,7 +121,7 @@ void MigrateDatabase()
 
     var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
- //   DatabaseMigration.Migrate(databaseType, connectionString, serviceScope.ServiceProvider);
+    DatabaseMigration.Migrate(databaseType, connectionString, serviceScope.ServiceProvider);
 }
 
 void AddGoogleAuthentication()
