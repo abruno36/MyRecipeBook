@@ -29,11 +29,11 @@ public class RegisterUserUseCaseTest
         result.Tokens.ShouldNotBeNull();
         result.Name.ShouldBe(request.Name);
 
-        /* FLUENT ASSERTIONS ABAIXO 
+        /* FLUENT ASSERTIONS ABAIXO */
         result.Should().NotBeNull();
         result.Tokens.Should().NotBeNull();
         result.Tokens.AccessToken.Should().NotBeNullOrEmpty();
-        result.Name.Should().Be(request.Name);*/
+        result.Name.Should().Be(request.Name);
     }
 
     [Fact]
