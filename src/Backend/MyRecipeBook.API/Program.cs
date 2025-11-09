@@ -1,5 +1,7 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyRecipeBook.API.BackgroundServices;
 using MyRecipeBook.API.Filters;
@@ -17,12 +19,21 @@ using MyRecipeBook.Infrastructure.Services;
 using StringConverter = MyRecipeBook.API.Converters.StringConverter;
 using MyRecipeBook.Domain.Services.ServiceBus;
 using MyRecipeBook.Infrastructure.Services.ServiceBus;
+using System.Text;
 
 const string AUTHENTICATION_TYPE = "Bearer";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new StringConverter()));
+// ✅ Carregar configuração de Test
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("appsettings.Test.json", optional: true);
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+    options.JsonSerializerOptions.Converters.Add(new StringConverter()));
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -31,8 +42,7 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityDefinition(AUTHENTICATION_TYPE, new OpenApiSecurityScheme
     {
         Description = @"JWT Authorization header using the Bearer scheme.
-                      Enter 'Bearer' [space] and then your token in the text input below.
-                      Example: 'Bearer 12345abcdef'",
+                      Enter 'Bearer {token}'.",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -41,20 +51,15 @@ builder.Services.AddSwaggerGen(options =>
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
+        { new OpenApiSecurityScheme
             {
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
                     Id = AUTHENTICATION_TYPE
-                },
-                Scheme = "oauth2",
-                Name = AUTHENTICATION_TYPE,
-                In = ParameterLocation.Header
+                }
             },
-            new List<string>()
-        }
+            new List<string>() }
     });
 });
 
@@ -70,14 +75,28 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddHttpContextAccessor();
 
+// ✅ REGISTRA JWT (esta parte é o que faltava)
+var signingKey = builder.Configuration.GetValue<string>("Settings:Jwt:SigningKey")!;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
 if (builder.Configuration.IsUnitTestEnviroment().IsFalse())
 {
     //builder.Services.AddHostedService<DeleteUserService>();
-
     //AddGoogleAuthentication();
 }
-
-//builder.Services.AddScoped<MyRecipeBook.Infrastructure.Services.ServiceBus.FakeDeleteUserProcessor>();
 
 builder.Services.AddHealthChecks().AddDbContextCheck<MyRecipeBookDbContext>();
 
@@ -103,13 +122,15 @@ app.UseMiddleware<CultureMiddleware>();
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseAuthentication(); // ✅ TEM QUE VIR ANTES
+app.UseAuthorization();  // ✅
 
 app.MapControllers();
 
 MigrateDatabase();
 
 await app.RunAsync();
+
 
 void MigrateDatabase()
 {
@@ -119,25 +140,8 @@ void MigrateDatabase()
     var databaseType = builder.Configuration.DatabaseType();
     var connectionString = builder.Configuration.ConnetionString();
 
-    var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
-
-    DatabaseMigration.Migrate(databaseType, connectionString, serviceScope.ServiceProvider);
-}
-
-void AddGoogleAuthentication()
-{
-    var clientId = builder.Configuration.GetValue<string>("Settings:Google:ClientId")!;
-    var clientSecret = builder.Configuration.GetValue<string>("Settings:Google:ClientSecret")!;
-
-    builder.Services.AddAuthentication(config =>
-    {
-        config.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    }).AddCookie()
-    .AddGoogle(googleOptions =>
-    {
-        googleOptions.ClientId = clientId;
-        googleOptions.ClientSecret = clientSecret;
-    });
+    using var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+    DatabaseMigration.Migrate(databaseType, connectionString, scope.ServiceProvider);
 }
 
 public partial class Program
