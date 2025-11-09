@@ -1,6 +1,7 @@
 ﻿using CommonTestUtilities.BlobStorage;
 using CommonTestUtilities.Entities;
 using CommonTestUtilities.IdEncryption;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,17 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting");
                     options.UseInternalServiceProvider(provider);
+                });
+
+                /// ✅ Aqui: Autenticação Fake
+                services.AddAuthentication("TestAuth")
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestAuth", options => { });
+
+                services.AddAuthorization(options =>
+                {
+                    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder("TestAuth")
+                        .RequireAuthenticatedUser()
+                        .Build();
                 });
 
                 using var scope = services.BuildServiceProvider().CreateScope();

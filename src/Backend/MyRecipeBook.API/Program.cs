@@ -122,8 +122,8 @@ app.UseMiddleware<CultureMiddleware>();
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // ✅ TEM QUE VIR ANTES
-app.UseAuthorization();  // ✅
+app.UseAuthentication(); 
+app.UseAuthorization();  
 
 app.MapControllers();
 

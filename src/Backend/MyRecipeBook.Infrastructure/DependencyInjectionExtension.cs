@@ -45,9 +45,16 @@ public static class DependencyInjectionExtension
         AddAzureStorage(services, configuration);
         AddQueue(services, configuration);
 
+        // ✅ AMBIENTE DE TESTE -> usar InMemory
         if (configuration.IsUnitTestEnviroment())
-            return;
+        {
+            services.AddDbContext<MyRecipeBookDbContext>(options =>
+                options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
+            return;
+        }
+
+        // ✅ AMBIENTE NORMAL -> usa SQL ou MySQL
         var databaseType = configuration.DatabaseType();
 
         if (databaseType == DatabaseType.MySql)
@@ -154,7 +161,7 @@ public static class DependencyInjectionExtension
     {
         var connectionString = configuration.GetValue<string>("Settings:BlobStorage:Azure");
 
-        if(connectionString.NotEmpty())
+        if (connectionString.NotEmpty())
         {
             services.AddScoped<IBlobStorageService>(c => new AzureStorageService(new BlobServiceClient(connectionString)));
         }
