@@ -15,14 +15,14 @@ public class AzureStorageService : IBlobStorageService
         _blobServiceClient = blobServiceClient;
     }
 
-    public async Task Upload(User user, Stream file, string fileName)
+    public async Task Upload(User user, Stream stream, string fileName)
     {
         var container = _blobServiceClient.GetBlobContainerClient(user.UserIdentifier.ToString());
         await container.CreateIfNotExistsAsync();
 
         var blobClient = container.GetBlobClient(fileName);
 
-        await blobClient.UploadAsync(file, overwrite: true);
+        await blobClient.UploadAsync(stream, overwrite: true);
     }
 
     public async Task<string> GetFileUrl(User user, string fileName)

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -6,6 +7,7 @@ using MyRecipeBook.API.Filters;
 using MyRecipeBook.API.Middleware;
 using MyRecipeBook.API.Token;
 using MyRecipeBook.Application;
+using MyRecipeBook.Application.Services;
 using MyRecipeBook.Domain.Security.Tokens;
 using MyRecipeBook.Domain.Services.ServiceBus;
 using MyRecipeBook.Domain.Services.Storage;
@@ -13,9 +15,8 @@ using MyRecipeBook.Infrastructure;
 using MyRecipeBook.Infrastructure.DataAccess;
 using MyRecipeBook.Infrastructure.Extensions;
 using MyRecipeBook.Infrastructure.Migrations;
-using MyRecipeBook.Infrastructure.Services;
 using MyRecipeBook.Infrastructure.Services.ServiceBus;
-using MyRecipeBook.Application.Services;
+using MyRecipeBook.Infrastructure.Services.Storage;
 using System.Text;
 using StringConverter = MyRecipeBook.API.Converters.StringConverter;
 
@@ -66,8 +67,12 @@ builder.Services.AddMvc(options => options.Filters.Add(typeof(ExceptionFilter)))
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ITokenProvider, HttpContextTokenValue>();
-builder.Services.AddScoped<IBlobStorageService, FakeBlobStorageService>();
 builder.Services.AddScoped<IDeleteUserQueue, FakeDeleteUserQueue>();
+
+builder.Services.AddSingleton(_ =>
+    new BlobServiceClient(builder.Configuration["Storage:ConnectionString"]));
+
+builder.Services.AddScoped<IBlobStorageService, AzureStorageService>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 
