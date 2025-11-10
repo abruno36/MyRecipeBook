@@ -4,6 +4,7 @@ using CommonTestUtilities.Repositories;
 using CommonTestUtilities.Requests;
 using CommonTestUtilities.Tokens;
 using FluentAssertions;
+using MyRecipeBook.Application.Services;
 using MyRecipeBook.Application.UseCases.User.Register;
 using MyRecipeBook.Domain.Extensions;
 using MyRecipeBook.Exceptions;
@@ -77,6 +78,18 @@ public class RegisterUserUseCaseTest
         if (email.NotEmpty())
             readRepositoryBuilder.ExistActiveUserWithEmail(email);
 
-        return new RegisterUserUseCase(writeRepository, readRepositoryBuilder.Build(), unitOfWork, passwordEncripter, accessTokenGenerator, mapper, tokenRepository, refreshTokenGenerator);
+        var tokenService = new TokenService(
+            accessTokenGenerator,
+            refreshTokenGenerator,
+            tokenRepository,
+            unitOfWork);
+
+        return new RegisterUserUseCase(
+            writeRepository,
+            readRepositoryBuilder.Build(),
+            unitOfWork,
+            passwordEncripter,
+            mapper,
+            tokenService);
     }
 }

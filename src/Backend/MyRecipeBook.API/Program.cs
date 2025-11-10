@@ -1,25 +1,23 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MyRecipeBook.API.BackgroundServices;
 using MyRecipeBook.API.Filters;
 using MyRecipeBook.API.Middleware;
 using MyRecipeBook.API.Token;
 using MyRecipeBook.Application;
-using MyRecipeBook.Domain.Extensions;
 using MyRecipeBook.Domain.Security.Tokens;
+using MyRecipeBook.Domain.Services.ServiceBus;
+using MyRecipeBook.Domain.Services.Storage;
 using MyRecipeBook.Infrastructure;
 using MyRecipeBook.Infrastructure.DataAccess;
 using MyRecipeBook.Infrastructure.Extensions;
 using MyRecipeBook.Infrastructure.Migrations;
-using MyRecipeBook.Domain.Services.Storage;
 using MyRecipeBook.Infrastructure.Services;
-using StringConverter = MyRecipeBook.API.Converters.StringConverter;
-using MyRecipeBook.Domain.Services.ServiceBus;
 using MyRecipeBook.Infrastructure.Services.ServiceBus;
+using MyRecipeBook.Application.Services;
 using System.Text;
+using StringConverter = MyRecipeBook.API.Converters.StringConverter;
 
 const string AUTHENTICATION_TYPE = "Bearer";
 
@@ -71,6 +69,8 @@ builder.Services.AddScoped<ITokenProvider, HttpContextTokenValue>();
 builder.Services.AddScoped<IBlobStorageService, FakeBlobStorageService>();
 builder.Services.AddScoped<IDeleteUserQueue, FakeDeleteUserQueue>();
 
+builder.Services.AddScoped<ITokenService, TokenService>();
+
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddHttpContextAccessor();
@@ -91,12 +91,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
-
-if (builder.Configuration.IsUnitTestEnviroment().IsFalse())
-{
-    //builder.Services.AddHostedService<DeleteUserService>();
-    //AddGoogleAuthentication();
-}
 
 builder.Services.AddHealthChecks().AddDbContextCheck<MyRecipeBookDbContext>();
 

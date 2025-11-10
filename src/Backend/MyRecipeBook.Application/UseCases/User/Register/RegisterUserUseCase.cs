@@ -4,7 +4,6 @@ using MyRecipeBook.Communication.Responses;
 using MyRecipeBook.Domain.Entities;
 using MyRecipeBook.Domain.Extensions;
 using MyRecipeBook.Domain.Repositories;
-using MyRecipeBook.Domain.Repositories.Token;
 using MyRecipeBook.Domain.Repositories.User;
 using MyRecipeBook.Domain.Security.Cryptography;
 using MyRecipeBook.Domain.Security.Tokens;
@@ -18,82 +17,47 @@ public class RegisterUserUseCase : IRegisterUserUseCase
     private readonly IUserReadOnlyRepository _readOnlyRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly IAccessTokenGenerator _accessTokenGenerator;
     private readonly IPasswordEncripter _passwordEncripter;
-    private readonly ITokenRepository _tokenRepository;
-    private readonly IRefreshTokenGenerator _refreshTokenGenerator;
+    private readonly ITokenService _tokenService;
 
     public RegisterUserUseCase(
-        IUserWriteOnlyRepository writeOnlyRepository,
-        IUserReadOnlyRepository readOnlyRepository,
-        IUnitOfWork unitOfWork,
-        IPasswordEncripter passwordEncripter,
-        IAccessTokenGenerator accessTokenGenerator,
-        IMapper mapper,
-        ITokenRepository tokenRepository,
-        IRefreshTokenGenerator refreshTokenGenerator)
+            IUserWriteOnlyRepository writeOnlyRepository,
+            IUserReadOnlyRepository readOnlyRepository,
+            IUnitOfWork unitOfWork,
+            IPasswordEncripter passwordEncripter,
+            IMapper mapper,
+            ITokenService tokenService)
     {
         _writeOnlyRepository = writeOnlyRepository;
         _readOnlyRepository = readOnlyRepository;
         _mapper = mapper;
         _passwordEncripter = passwordEncripter;
         _unitOfWork = unitOfWork;
-        _accessTokenGenerator = accessTokenGenerator;
-        _refreshTokenGenerator = refreshTokenGenerator;
-        _tokenRepository = tokenRepository;
+        _tokenService = tokenService;
     }
 
     public async Task<ResponseRegisteredUserJson> Execute(RequestRegisterUserJson request)
     {
         await Validate(request);
 
-        try
-        {
-            var user = _mapper.Map<Domain.Entities.User>(request);
-            user.Password = _passwordEncripter.Encrypt(request.Password);
+        var user = _mapper.Map<Domain.Entities.User>(request);
+        user.Password = _passwordEncripter.Encrypt(request.Password);
 
-            await _writeOnlyRepository.Add(user);
-            await _unitOfWork.Commit(); // <-- TENTA SALVAR USER
-
-            Console.WriteLine($"[DEBUG] User salvo. Id={user.Id} UserIdentifier={user.UserIdentifier}");
-
-            var refreshToken = await CreateAndSaveRefreshToken(user); // <-- TENTA SALVAR REFRESH TOKEN
-
-            Console.WriteLine($"[DEBUG] Refresh token salvo.");
-
-            return new ResponseRegisteredUserJson
-            {
-                Name = user.Name,
-                Email = user.Email,
-                Tokens = new ResponseTokensJson
-                {
-                    AccessToken = _accessTokenGenerator.Generate(user.UserIdentifier),
-                    RefreshToken = refreshToken
-                }
-            };
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("[ERRO EXECUTE] " + ex.ToString());
-            throw;
-        }
-    }
-
-
-
-    private async Task<string> CreateAndSaveRefreshToken(Domain.Entities.User user)
-    {
-        var refreshToken = _refreshTokenGenerator.Generate();
-
-        await _tokenRepository.SaveNewRefreshToken(new RefreshToken
-        {
-            Value = refreshToken,
-            UserId = user.Id
-        });
-
+        await _writeOnlyRepository.Add(user);
         await _unitOfWork.Commit();
 
-        return refreshToken;
+        var (accessToken, refreshToken) = await _tokenService.GenerateTokensAsync(user);
+
+        return new ResponseRegisteredUserJson
+        {
+            Name = user.Name,
+            Email = user.Email,
+            Tokens = new ResponseTokensJson
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            }
+        };
     }
 
     private async Task Validate(RequestRegisterUserJson request)

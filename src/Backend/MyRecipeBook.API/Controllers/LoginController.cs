@@ -42,7 +42,10 @@ public class LoginController : MyRecipeBookBaseController
 
             var token = await useCase.Execute(name, email);
 
-            return Redirect($"{returnUrl}/{token}");
+            if (!Url.IsLocalUrl(returnUrl))
+                return Redirect("/");
+
+            return LocalRedirect($"{returnUrl}/{token}");
         }
     }
 }
