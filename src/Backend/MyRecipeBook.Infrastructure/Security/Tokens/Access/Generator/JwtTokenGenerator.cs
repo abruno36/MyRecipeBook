@@ -19,7 +19,7 @@ public class JwtTokenGenerator : JwtTokenHandler, IAccessTokenGenerator
     public string Generate(Guid userIdentifier)
     {
         var claims = new List<Claim>()
-        {
+        { 
             new Claim(ClaimTypes.Sid, userIdentifier.ToString())
         };
 

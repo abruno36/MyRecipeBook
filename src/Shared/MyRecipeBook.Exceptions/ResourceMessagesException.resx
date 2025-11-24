@@ -178,7 +178,7 @@
     <value>Invalid number of ingredients. The list must contain between 1 and 5 ingredients.</value>
   </data>
   <data name="INVALID_PASSWORD" xml:space="preserve">
-    <value>The password must be longer than 6 characters.</value>
+    <value>The password must be at least 8 characters long.</value>
   </data>
   <data name="INVALID_SESSION" xml:space="preserve">
     <value>We couldn't find a valid session. Please log in to access this feature.</value>
@@ -200,6 +200,12 @@
   </data>
   <data name="PASSWORD_EMPTY" xml:space="preserve">
     <value>The password cannot be empty.</value>
+  </data>
+  <data name="PASSWORD_NEEDS_SPECIAL_CHAR" xml:space="preserve">
+    <value>Password must contain at least one special character.</value>
+  </data>
+  <data name="PASSWORD_NEEDS_UPPERCASE" xml:space="preserve">
+    <value>Password must contain at least one uppercase letter.</value>
   </data>
   <data name="RECIPE_NOT_FOUND" xml:space="preserve">
     <value>The recipe could not be found.</value>

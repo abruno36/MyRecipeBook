@@ -241,7 +241,7 @@ namespace MyRecipeBook.Exceptions {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The password must be longer than 6 characters..
+        ///   Looks up a localized string similar to The password must be at least 8 characters long..
         /// </summary>
         public static string INVALID_PASSWORD {
             get {
@@ -309,6 +309,24 @@ namespace MyRecipeBook.Exceptions {
         public static string PASSWORD_EMPTY {
             get {
                 return ResourceManager.GetString("PASSWORD_EMPTY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain at least one special character..
+        /// </summary>
+        public static string PASSWORD_NEEDS_SPECIAL_CHAR {
+            get {
+                return ResourceManager.GetString("PASSWORD_NEEDS_SPECIAL_CHAR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain at least one uppercase letter..
+        /// </summary>
+        public static string PASSWORD_NEEDS_UPPERCASE {
+            get {
+                return ResourceManager.GetString("PASSWORD_NEEDS_UPPERCASE", resourceCulture);
             }
         }
         

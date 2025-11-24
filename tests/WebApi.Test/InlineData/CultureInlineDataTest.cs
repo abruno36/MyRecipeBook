@@ -8,8 +8,8 @@ public class CultureInlineDataTest : IEnumerable<object[]>
     {
         yield return new object[] { "en" };
         yield return new object[] { "pt-PT" };
-        yield return new object[] { "pt-BR" };
         yield return new object[] { "fr" };
+        yield return new object[] { "pt-BR" };
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

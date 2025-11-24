@@ -178,7 +178,7 @@
     <value>Número inválido de ingredientes. A lista deve conter entre 1 e 5 ingredientes.</value>
   </data>
   <data name="INVALID_PASSWORD" xml:space="preserve">
-    <value>A senha deve ter mais de 6 caracteres.</value>
+    <value>A senha deve ter pelo menos 8 caracteres.</value>
   </data>
   <data name="INVALID_SESSION" xml:space="preserve">
     <value>Não foi possível encontrar uma sessão válida. Faça login para acessar esse recurso.</value>
@@ -200,6 +200,12 @@
   </data>
   <data name="PASSWORD_EMPTY" xml:space="preserve">
     <value>A senha não pode estar vazia.</value>
+  </data>
+  <data name="PASSWORD_NEEDS_SPECIAL_CHAR" xml:space="preserve">
+    <value>Password deve ter pelo menos 1 caracter especial</value>
+  </data>
+  <data name="PASSWORD_NEEDS_UPPERCASE" xml:space="preserve">
+    <value>Password deve ter pelo menos 1 letra maiuscula</value>
   </data>
   <data name="RECIPE_NOT_FOUND" xml:space="preserve">
     <value>Não foi possível encontrar a receita.</value>

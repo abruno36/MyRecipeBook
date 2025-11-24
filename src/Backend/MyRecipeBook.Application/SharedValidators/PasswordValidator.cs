@@ -15,10 +15,24 @@ public class PasswordValidator<T> : PropertyValidator<T, string>
             return false;
         }
 
-        if (password.Length < 6)
+        if (password.Length < 8)
         {
             context.MessageFormatter.AppendArgument("ErrorMessage", ResourceMessagesException.INVALID_PASSWORD);
 
+            return false;
+        }
+
+        // Pelo menos 1 letra maiúscula
+        if (!password.Any(char.IsUpper))
+        {
+            context.MessageFormatter.AppendArgument("ErrorMessage", ResourceMessagesException.PASSWORD_NEEDS_UPPERCASE);
+            return false;
+        }
+
+        // Pelo menos 1 caractere especial
+        if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
+        {
+            context.MessageFormatter.AppendArgument("ErrorMessage", ResourceMessagesException.PASSWORD_NEEDS_SPECIAL_CHAR);
             return false;
         }
 

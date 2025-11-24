@@ -24,6 +24,7 @@ public class UpdateUserUseCaseTest
 
         Func<Task> act = async () => await useCase.Execute(request);
 
+        //funções que não devolve valores - Execute - UpdateUserUseCase
         await act.Should().NotThrowAsync();
 
         user.Name.Should().Be(request.Name);
