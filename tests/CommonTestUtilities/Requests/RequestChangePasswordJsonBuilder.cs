@@ -7,8 +7,10 @@ public class RequestChangePasswordJsonBuilder
 {
     public static RequestChangePasswordJson Build(int passwordLength = 10)
     {
+        var validPassword = "Aa1!" + new string('x', Math.Max(4, passwordLength - 4));
+
         return new Faker<RequestChangePasswordJson>()
-            .RuleFor(u => u.Password, (f) => f.Internet.Password())
-            .RuleFor(u => u.NewPassword, (f) => f.Internet.Password(passwordLength));
+            .RuleFor(x => x.Password, f => validPassword)
+            .RuleFor(x => x.NewPassword, f => validPassword);
     }
 }

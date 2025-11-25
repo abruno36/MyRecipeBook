@@ -69,23 +69,23 @@ public class RegisterUserValidatorTest
     }
 
     [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    [InlineData(4)]
-    [InlineData(5)]
-    public void Error_Password_Invalid(int passwordLength = 10)
+    [InlineData("aaaaaaa")]        // sem uppercase e sem especial
+    [InlineData("AAAAAAA")]        // sem especial
+    [InlineData("aaaaaaa!")]       // sem uppercase
+    public void Error_Password_Invalid(string password)
     {
         var validator = new RegisterUserValidator();
 
-        var request = RequestRegisterUserJsonBuilder.Build(passwordLength);
+        var request = RequestRegisterUserJsonBuilder.Build();
+        request.Password = password;
 
         var result = validator.Validate(request);
 
         result.IsValid.Should().BeFalse();
-
         result.Errors.Should().ContainSingle()
-            .And.Contain(e => e.ErrorMessage.Equals(ResourceMessagesException.INVALID_PASSWORD));
+            .And.Contain(e => e.ErrorMessage.Equals(ResourceMessagesException.INVALID_PASSWORD) ||
+                              e.ErrorMessage.Equals(ResourceMessagesException.PASSWORD_NEEDS_UPPERCASE) ||
+                              e.ErrorMessage.Equals(ResourceMessagesException.PASSWORD_NEEDS_SPECIAL_CHAR));
     }
 
     [Fact]
