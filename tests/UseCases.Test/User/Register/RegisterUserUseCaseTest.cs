@@ -25,12 +25,10 @@ public class RegisterUserUseCaseTest
 
         var result = await useCase.Execute(request);
 
-        /* SHOULDLY */
         result.ShouldNotBeNull();
         result.Tokens.ShouldNotBeNull();
         result.Name.ShouldBe(request.Name);
 
-        /* FLUENT ASSERTIONS ABAIXO */
         result.Should().NotBeNull();
         result.Tokens.Should().NotBeNull();
         result.Tokens.AccessToken.Should().NotBeNullOrEmpty();
@@ -47,7 +45,8 @@ public class RegisterUserUseCaseTest
         Func<Task> act = async () => await useCase.Execute(request);
 
         (await act.Should().ThrowAsync<ErrorOnValidationException>())
-            .Where(e => e.GetErrorMessages().Count == 1 && e.GetErrorMessages().Contains(ResourceMessagesException.EMAIL_ALREADY_REGISTERED));
+            .Where(e => e.GetErrorMessages().Count == 1 &&
+                e.GetErrorMessages().Contains(ResourceMessagesException.EMAIL_ALREADY_REGISTERED));
     }
 
     [Fact]
@@ -61,7 +60,8 @@ public class RegisterUserUseCaseTest
         Func<Task> act = async () => await useCase.Execute(request);
 
         (await act.Should().ThrowAsync<ErrorOnValidationException>())
-            .Where(e => e.GetErrorMessages().Count == 1 && e.GetErrorMessages().Contains(ResourceMessagesException.NAME_EMPTY));
+            .Where(e => e.GetErrorMessages().Count == 1 &&
+                e.GetErrorMessages().Contains(ResourceMessagesException.NAME_EMPTY));
     }
 
     private static RegisterUserUseCase CreateUseCase(string? email = null)
