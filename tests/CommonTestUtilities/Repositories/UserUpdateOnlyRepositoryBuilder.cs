@@ -12,7 +12,21 @@ public class UserUpdateOnlyRepositoryBuilder
 
     public UserUpdateOnlyRepositoryBuilder GetById(User user)
     {
-        _repository.Setup(x => x.GetById(user.Id)).ReturnsAsync(user);
+        _repository.Setup(x => x.GetById(user.Id))
+            .ReturnsAsync(user);
+
+        return this;
+    }
+
+    public UserUpdateOnlyRepositoryBuilder SetupUpdate(User user)
+    {
+        _repository.Setup(x => x.Update(It.IsAny<User>()))
+            .Callback<User>(updatedUser =>
+            {
+                // FORÇA a atualização no MESMO objeto usado no teste
+                user.Password = updatedUser.Password;
+            });
+
         return this;
     }
 
