@@ -24,6 +24,9 @@ const string AUTHENTICATION_TYPE = "Bearer";
 
 var builder = WebApplication.CreateBuilder(args);
 
+Console.WriteLine("ENV: " + builder.Environment.EnvironmentName);
+Console.WriteLine("AZURE: " + builder.Configuration["Settings:BlobStorage:Azure"]);
+
 // ✅ Carregar configuração de Test
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -69,7 +72,7 @@ builder.Services.AddScoped<ITokenProvider, HttpContextTokenValue>();
 builder.Services.AddScoped<IDeleteUserQueue, FakeDeleteUserQueue>();
 
 builder.Services.AddSingleton(_ =>
-    new BlobServiceClient(builder.Configuration["Storage:ConnectionString"]));
+    new BlobServiceClient(builder.Configuration["Settings:BlobStorage:Azure"]));
 
 builder.Services.AddScoped<IBlobStorageService, AzureStorageService>();
 

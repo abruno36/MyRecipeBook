@@ -57,7 +57,8 @@ public sealed class RecipeRepository : IRecipeWriteOnlyRepository, IRecipeReadOn
     async Task<Recipe?> IRecipeReadOnlyRepository.GetById(User user, long recipeId)
     {
         return await GetFullRecipe()
-            .AsNoTracking()
+            .AsNoTracking() //desativa o tracking do Entity Framework, tornando a consulta mais rápida e leve.
+                           //É usado para consultas de leitura, quando não queremos alterar os objetos retornados.
             .FirstOrDefaultAsync(recipe => recipe.Active && recipe.Id == recipeId && recipe.UserId == user.Id);
     }
 

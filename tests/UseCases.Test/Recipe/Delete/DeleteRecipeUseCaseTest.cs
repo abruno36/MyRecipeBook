@@ -21,7 +21,7 @@ public class DeleteRecipeUseCaseTest
 
         var act = async () => { await useCase.Execute(recipe.Id); };
 
-        await act.Should().NotThrowAsync();
+        await act.Should().NotThrowAsync(); //NotThrowAsync() como a função Execute não devolve nada, usamos NotThrowAsync
     }
 
     [Fact]
