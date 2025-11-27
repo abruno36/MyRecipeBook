@@ -40,9 +40,13 @@ public class UserRepository : IUserWriteOnlyRepository, IUserReadOnlyRepository,
 
     public async Task<User?> GetByEmail(string email)
     {
+        var normalized = email.Trim().ToLower();
+
         return await _dbContext
             .Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(user => user.Active && user.Email.Equals(email));
+            .FirstOrDefaultAsync(user =>
+                user.Active &&
+                user.Email.ToLower() == normalized);
     }
 }

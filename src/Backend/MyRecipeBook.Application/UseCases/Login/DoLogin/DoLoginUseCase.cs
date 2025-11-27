@@ -39,7 +39,7 @@ public class DoLoginUseCase : IDoLoginUseCase
     {
         var user = await _repository.GetByEmail(request.Email);
 
-        if(user is null || _passwordEncripter.IsValid(request.Password, user.Password).IsFalse())
+        if (user is null || _passwordEncripter.IsValid(request.Password, user.Password).IsFalse())
             throw new InvalidLoginException();
 
         var refreshToken = await CreateAndSaveRefreshToken(user);
