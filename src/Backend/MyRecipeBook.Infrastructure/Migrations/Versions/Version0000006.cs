@@ -3,21 +3,21 @@ using System.Text;
 
 namespace MyRecipeBook.Infrastructure.Migrations.Versions;
 
-[Migration(6, "Insert fixed and random recipes with images")]
+[Migration(6, "Insert fixed and random recipes with images (Enum CookingTime FIXED)")]
 public class Version00000006 : Migration
 {
     public override void Up()
     {
         //
-        // ================================
-        // 📌 1 — RECEITAS FIXAS
-        // ================================
+        // ====================================
+        // 1 — RECEITAS FIXAS (corrigido)
+        // ====================================
         //
 
-        // === Bolo de Chocolate (User 1) ===
+        // Bolo de Chocolate — 45 min → categoria 2
         Execute.Sql(@"
             INSERT INTO Recipes (Title, CookingTime, Difficulty, UserId, ImageIdentifier, Active, CreatedOn)
-            VALUES ('Bolo de Chocolate', 45, 2, 1, 'food-11111111-1111-1111-1111-111111111111.jpg', 1, GETDATE());
+            VALUES ('Bolo de Chocolate', 2, 2, 1, 'food-11111111-1111-1111-1111-111111111111.jpg', 1, GETDATE());
 
             DECLARE @BoloId BIGINT = SCOPE_IDENTITY();
 
@@ -37,10 +37,10 @@ public class Version00000006 : Migration
         ");
 
 
-        // === Salada Caesar (User 2) ===
+        // Salada Caesar — 10 min → categoria 1
         Execute.Sql(@"
             INSERT INTO Recipes (Title, CookingTime, Difficulty, UserId, ImageIdentifier, Active, CreatedOn)
-            VALUES ('Salada Caesar', 10, 1, 2, 'food-22222222-2222-2222-2222-222222222222.jpg', 1, GETDATE());
+            VALUES ('Salada Caesar', 1, 1, 2, 'food-22222222-2222-2222-2222-222222222222.jpg', 1, GETDATE());
 
             DECLARE @SaladaId BIGINT = SCOPE_IDENTITY();
 
@@ -60,9 +60,9 @@ public class Version00000006 : Migration
 
 
         //
-        // ================================
-        // 📌 2 — 30 RECEITAS ALEATÓRIAS
-        // ================================
+        // ====================================
+        // 2 — 30 RECEITAS ALEATÓRIAS (Enum FIXED)
+        // ====================================
         //
 
         var rnd = new Random();
@@ -122,11 +122,11 @@ public class Version00000006 : Migration
             "Asse por 30 minutos."
         };
 
-        // 30 receitas únicas
-        for (int i = 0; i < 30; i++)
+        // 30 receitas
+        for (int i = 0; i < funnyNames.Length; i++)
         {
-            string title = funnyNames[i]; // já garantido que é único
-            int cooking = rnd.Next(5, 90);
+            string title = funnyNames[i];
+            int cooking = rnd.Next(0, 4);      // ENUM CORRETO
             int difficulty = rnd.Next(1, 4);
             int userId = rnd.Next(1, 3);
             string image = $"food-{Guid.NewGuid()}.jpg";
@@ -140,7 +140,6 @@ public class Version00000006 : Migration
                 DECLARE @R BIGINT = SCOPE_IDENTITY();
             ");
 
-            // Ingredientes (5 aleatórios)
             for (int j = 0; j < 5; j++)
             {
                 string ing = ingredientsPool[rnd.Next(ingredientsPool.Length)];
@@ -150,7 +149,6 @@ public class Version00000006 : Migration
                 ");
             }
 
-            // Instruções (3 aleatórias)
             for (int s = 0; s < 3; s++)
             {
                 string step = stepsPool[rnd.Next(stepsPool.Length)];
@@ -160,7 +158,6 @@ public class Version00000006 : Migration
                 ");
             }
 
-            // DishType 1 a 3
             int type = rnd.Next(1, 4);
             sql.Append($@"
                 INSERT INTO DishTypes (Type, RecipeId, Active, CreatedOn)

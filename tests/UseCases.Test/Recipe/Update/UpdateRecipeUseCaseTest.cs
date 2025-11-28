@@ -1,6 +1,5 @@
 ﻿using CommonTestUtilities.Entities;
 using CommonTestUtilities.LoggedUser;
-using CommonTestUtilities.Mapper;
 using CommonTestUtilities.Repositories;
 using CommonTestUtilities.Requests;
 using FluentAssertions;
@@ -62,11 +61,12 @@ public class UpdateRecipeUseCaseTest
         MyRecipeBook.Domain.Entities.User user,
         MyRecipeBook.Domain.Entities.Recipe? recipe = null)
     {
-        var mapper = MapperBuilder.Build();
         var loggedUser = LoggedUserBuilder.Build(user);
         var unitOfWork = UnitOfWorkBuilder.Build();
-        var repository = new RecipeUpdateOnlyRepositoryBuilder().GetById(user, recipe).Build();
+        var repository = new RecipeUpdateOnlyRepositoryBuilder()
+                             .GetById(user, recipe)
+                             .Build();
 
-        return new UpdateRecipeUseCase(loggedUser, unitOfWork, mapper, repository);
+        return new UpdateRecipeUseCase(loggedUser, unitOfWork, repository);
     }
 }
