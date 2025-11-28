@@ -158,7 +158,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"title\": \"Bolo de Chocolate Atualizado\",\r\n  \"cookingTime\": 2,\r\n  \"difficulty\": 2,\r\n  \"ingredients\": [\r\n    \"Farinha\",\r\n    \"Chocolate em pó\",\r\n    \"Ovos\"\r\n  ],\r\n  \"instructions\": [\r\n    { \"step\": 1, \"text\": \"Misture tudo\" },\r\n    { \"step\": 2, \"text\": \"Coloque no forno\" }\r\n  ],\r\n  \"dishTypes\": [1]\r\n}",
+							"raw": "{\r\n  \"recipeTitle_Ingredient\": \"Bolo\",\r\n  \"cookingTimes\": [\r\n    \r\n  ],\r\n  \"difficulties\": [\r\n    \r\n  ],\r\n  \"dishTypes\": [\r\n    1\r\n  ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
