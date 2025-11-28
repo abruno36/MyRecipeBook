@@ -63,86 +63,91 @@
 			"name": "Recipe",
 			"item": [
 				{
-					"name": "debug-hash/compare",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrlLocal}}/debug-hash/compare",
-							"host": [
-								"{{baseUrlLocal}}"
-							],
-							"path": [
-								"debug-hash",
-								"compare"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "generate-hash",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrlLocal}}/debug-hash/generate-hash?password=Abt038905@@",
-							"host": [
-								"{{baseUrlLocal}}"
-							],
-							"path": [
-								"debug-hash",
-								"generate-hash"
-							],
-							"query": [
-								{
-									"key": "password",
-									"value": "Abt038905@@"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "verify_password",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrlLocal}}/debug-hash/verify?password=Abt120556@@&hash=$2a$11$5uHawj6xs0FfHRd5jI7Ok.Qp5rcKcuSeI1UEA81APwYRXPkPWKQ04q",
-							"host": [
-								"{{baseUrlLocal}}"
-							],
-							"path": [
-								"debug-hash",
-								"verify"
-							],
-							"query": [
-								{
-									"key": "password",
-									"value": "Abt120556@@"
+					"name": "Analise",
+					"item": [
+						{
+							"name": "debug-hash/compare",
+							"request": {
+								"auth": {
+									"type": "noauth"
 								},
-								{
-									"key": "hash",
-									"value": "$2a$11$5uHawj6xs0FfHRd5jI7Ok.Qp5rcKcuSeI1UEA81APwYRXPkPWKQ04q"
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrlLocal}}/debug-hash/compare",
+									"host": [
+										"{{baseUrlLocal}}"
+									],
+									"path": [
+										"debug-hash",
+										"compare"
+									]
 								}
-							]
+							},
+							"response": []
+						},
+						{
+							"name": "generate-hash",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrlLocal}}/debug-hash/generate-hash?password=Abt038905@@",
+									"host": [
+										"{{baseUrlLocal}}"
+									],
+									"path": [
+										"debug-hash",
+										"generate-hash"
+									],
+									"query": [
+										{
+											"key": "password",
+											"value": "Abt038905@@"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "verify_password",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrlLocal}}/debug-hash/verify?password=Abt120556@@&hash=$2a$11$5uHawj6xs0FfHRd5jI7Ok.Qp5rcKcuSeI1UEA81APwYRXPkPWKQ04q",
+									"host": [
+										"{{baseUrlLocal}}"
+									],
+									"path": [
+										"debug-hash",
+										"verify"
+									],
+									"query": [
+										{
+											"key": "password",
+											"value": "Abt120556@@"
+										},
+										{
+											"key": "hash",
+											"value": "$2a$11$5uHawj6xs0FfHRd5jI7Ok.Qp5rcKcuSeI1UEA81APwYRXPkPWKQ04q"
+										}
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				},
 				{
-					"name": "RecipeFilter",
+					"name": "recipe filter",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -158,7 +163,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"recipeTitle_Ingredient\": \"Bolo de Fubá\",\r\n  \"cookingTimes\": [],\r\n  \"difficulties\": [2],\r\n  \"dishTypes\": []\r\n}",
+							"raw": "{\r\n  \"recipeTitle_Ingredient\": \"Bolo de Casca de Banana\",\r\n  \"cookingTimes\": [],\r\n  \"difficulties\": [2],\r\n  \"dishTypes\": []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -179,7 +184,7 @@
 					"response": []
 				},
 				{
-					"name": "recipeById",
+					"name": "recipe ById",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -201,20 +206,41 @@
 							"path": [
 								"recipe",
 								"c9o"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "MWH",
-									"disabled": true
-								}
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Register Recipe (FormData)",
+					"name": "recipe delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlLocal}}/recipe/Nu2",
+							"host": [
+								"{{baseUrlLocal}}"
+							],
+							"path": [
+								"recipe",
+								"Nu2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "recipe register",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -229,7 +255,7 @@
 							"formdata": [
 								{
 									"key": "title",
-									"value": "Bolo de Fubá Cremoso do Bruno",
+									"value": "Bolo de Casca de Banana da Terra",
 									"type": "text"
 								},
 								{
@@ -375,7 +401,7 @@
 					"response": []
 				},
 				{
-					"name": "Update Recipe",
+					"name": "recipe update",
 					"protocolProfileBehavior": {
 						"disabledSystemHeaders": {
 							"content-type": true
