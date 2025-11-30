@@ -51,11 +51,12 @@ public class RecipeController : MyRecipeBookBaseController
         [FromServices] IGetRecipeByIdUseCase useCase,
         [FromRoute] [ModelBinder(typeof(MyRecipeBookIdBinder))] long id)
     {
-        var response = await useCase.Execute(id);
+        var response = await useCase.Execute(id); 
 
         return Ok(response);
     }
 
+    //MyRecipeBookIdBinder - método para descriptografar o Id
     [HttpDelete]
     [Route("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

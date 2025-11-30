@@ -51,7 +51,7 @@ public sealed class RecipeRepository : IRecipeWriteOnlyRepository, IRecipeReadOn
                 || recipe.Ingredients.Any(ingredient => ingredient.Item.Contains(filters.RecipeTitle_Ingredient)));
         }
 
-        return await query.ToListAsync();
+        return await query.ToListAsync(); //neste momento vai no banco de dados executar a query definida 
     }
 
     async Task<Recipe?> IRecipeReadOnlyRepository.GetById(User user, long recipeId)
