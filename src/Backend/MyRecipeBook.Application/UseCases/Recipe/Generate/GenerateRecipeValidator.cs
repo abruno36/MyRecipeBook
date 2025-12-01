@@ -22,7 +22,7 @@ public class GenerateRecipeValidator : AbstractValidator<RequestGenerateRecipeJs
                 {
                     context.AddFailure("Ingredient", ResourceMessagesException.INGREDIENT_EMPTY);
                 }
-                else if (value.Count(c => c == ' ') > 3 || value.Count(c => c == '/') > 1)
+                else if (value.Count(c => c == ' ') > 4 || value.Count(c => c == '/') > 1)
                 {
                     context.AddFailure("Ingredient", ResourceMessagesException.INGREDIENT_NOT_FOLLOWING_PATTERN);
                 }
