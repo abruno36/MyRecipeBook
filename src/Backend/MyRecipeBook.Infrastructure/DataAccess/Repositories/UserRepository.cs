@@ -40,12 +40,9 @@ public class UserRepository : IUserWriteOnlyRepository, IUserReadOnlyRepository,
 
     public async Task<User?> GetByEmail(string email)
     {
-        var normalized = email.Trim();
-
-        return await _dbContext.Users
+        return await _dbContext
+            .Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(user =>
-                user.Active &&
-                EF.Functions.Collate(user.Email, "SQL_Latin1_General_CP1_CI_AS") == normalized);
+            .FirstOrDefaultAsync(user => user.Active && user.Email.Equals(email));
     }
 }
