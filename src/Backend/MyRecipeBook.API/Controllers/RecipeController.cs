@@ -105,16 +105,17 @@ public class RecipeController : MyRecipeBookBaseController
     [ProducesResponseType(typeof(ResponseErrorJson), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ResponseErrorJson), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateImage(
-        [FromRoute][ModelBinder(typeof(MyRecipeBookIdBinder))] long id,
-        [FromForm] UpdateImageForm form,
-        [FromServices] IAddUpdateImageCoverUseCase useCase)
+    [FromRoute][ModelBinder(typeof(MyRecipeBookIdBinder))] long id,
+    [FromForm] UpdateImageForm form,
+    [FromServices] IAddUpdateImageCoverUseCase useCase)
     {
         if (form == null || form.File == null)
-            return BadRequest(new ResponseErrorJson(new[] { "File is required." }));
+            return BadRequest(new ResponseErrorJson(FileRequiredError));
 
         await useCase.Execute(id, form.File);
         return NoContent();
     }
 
+    private static readonly string[] FileRequiredError = { "File is required." };
 
 }
