@@ -163,7 +163,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"recipeTitle_Ingredient\": \"Bolo de Casca de Banana\",\r\n  \"cookingTimes\": [],\r\n  \"difficulties\": [2],\r\n  \"dishTypes\": []\r\n}",
+							"raw": "{\r\n  \"recipeTitle_Ingredient\": \"Bolo de\",\r\n  \"cookingTimes\": [],\r\n  \"difficulties\": [2],\r\n  \"dishTypes\": []\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -178,6 +178,49 @@
 							"path": [
 								"recipe",
 								"filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "recipe generate",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept-Language",
+								"value": "pt-BR",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"ingredients\": [\r\n    \"3 colheres farinha de trigo\",\r\n    \"3 ovos\",\r\n    \"2 xícaras de fubá\",\r\n    \"2 xícaras de açúcar\"\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlLocal}}/recipe/generate",
+							"host": [
+								"{{baseUrlLocal}}"
+							],
+							"path": [
+								"recipe",
+								"generate"
 							]
 						}
 					},
@@ -199,13 +242,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrlLocal}}/recipe/c9o",
+							"raw": "{{baseUrlLocal}}/recipe/s5I",
 							"host": [
 								"{{baseUrlLocal}}"
 							],
 							"path": [
 								"recipe",
-								"c9o"
+								"s5I"
 							]
 						}
 					},
@@ -227,13 +270,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrlLocal}}/recipe/Nu2",
+							"raw": "{{baseUrlLocal}}/recipe/wyh",
 							"host": [
 								"{{baseUrlLocal}}"
 							],
 							"path": [
 								"recipe",
-								"Nu2"
+								"wyh"
 							]
 						}
 					},
@@ -255,7 +298,7 @@
 							"formdata": [
 								{
 									"key": "title",
-									"value": "Bolo de Casca de Banana da Terra",
+									"value": "Bolo de Casca de Banana da Terra2",
 									"type": "text"
 								},
 								{
@@ -428,16 +471,99 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"title\": \"Bolo de Fubá Cremoso\",\r\n  \"cookingTime\": 2,\r\n  \"difficulty\": 2,\r\n  \"ingredients\": [\r\n        \"4 xícaras (chá) de Leite Líquido NINHO® Forti+ Integral\",\r\n        \"4 ovos\",\r\n        \"2 xícaras (chá) de açúcar\",\r\n        \"2 colheres (sopa) de manteiga\",\r\n        \"1 xícara (chá) de queijo parmesão ralado\",\r\n        \"1 e meia xícara (chá) de fubá\",\r\n        \"2 colheres (sopa) de farinha de trigo\",\r\n        \"1 colher (sopa) de fermento em pó\"\r\n  ],\r\n  \"instructions\": [\r\n    { \"step\": 1, \"text\": \"Em um liquidificador, bata o Leite NINHO, os ovos, o açúcar, a manteiga e o queijo parmesão ralado\" },\r\n    { \"step\": 2, \"text\": \"Acrescente o fubá, a farinha de trigo e o fermento em pó e bata até ficar homogêneo.\" },\r\n    { \"step\": 3, \"text\": \"Coloque em forma retangular (20 cm x 30 cm) untada com manteiga e polvilhada com fubá e leve ao forno médio (180°C), preaquecido, por cerca de 30 minutos.\" },\r\n    { \"step\": 4, \"text\": \"Aguardar esfriar para desinformar\" }\r\n  ],\r\n  \"dishTypes\": [1, 3]\r\n}"
+							"raw": "{\r\n  \"title\": \"Bolo de Chocolate com Granulado\",\r\n  \"cookingTime\": 2,\r\n  \"difficulty\": 2,\r\n  \"ingredients\": [\r\n        \"1 e 1/2 xícara (chá) de água normal\",\r\n        \"1 xícara (chá) de óleo granola\",\r\n        \"2 xícaras (chá) de açúcar refinado\",\r\n        \"3 ovos\",\r\n        \"3 xícaras (chá) de farinha de trigo\",\r\n        \"1 colher (sopa) de fermento em pó\",\r\n        \"Margarina e farinha de trigo para untar e enfarinhar\",\r\n        \"Chocolate granulado para polvilhar\"\r\n  ],\r\n  \"instructions\": [\r\n    { \"step\": 1, \"text\": \"No liquidificador, bata a água, o óleo, o chocolate, o açúcar e os ovos por 2\" },\r\n    { \"step\": 2, \"text\": \"minutos. Transfira para uma tigela e misture a farinha e o fermento com uma\" },\r\n    { \"step\": 3, \"text\": \"colher. Despeje em uma fôrma de 25cm x 35cm untada e enfarinhada, e leve\" },\r\n    { \"step\": 4, \"text\": \"Polvilhe com granulado e sirva em pedaços.\" }\r\n  ],\r\n  \"dishTypes\": [1, 3]\r\n}"
 						},
 						"url": {
-							"raw": "{{baseUrlLocal}}/recipe/c9o",
+							"raw": "{{baseUrlLocal}}/recipe/Olx",
 							"host": [
 								"{{baseUrlLocal}}"
 							],
 							"path": [
 								"recipe",
-								"c9o"
+								"Olx"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "recipe update img",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/bruno/Documents/!Udemy/MeuLivroDeReceitas/bolo-de-fuba-com-coco.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrlLocal}}/recipe/image/update/s5I",
+							"host": [
+								"{{baseUrlLocal}}"
+							],
+							"path": [
+								"recipe",
+								"image",
+								"update",
+								"s5I"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlLocal}}/dashboard",
+							"host": [
+								"{{baseUrlLocal}}"
+							],
+							"path": [
+								"dashboard"
 							]
 						}
 					},
