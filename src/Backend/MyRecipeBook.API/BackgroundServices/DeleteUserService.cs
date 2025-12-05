@@ -4,7 +4,8 @@ using MyRecipeBook.Infrastructure.Services.ServiceBus;
 
 namespace MyRecipeBook.API.BackgroundServices;
 
-public class DeleteUserService : BackgroundService
+//toda classe que tem como herança BackgroundService, será executada como segundo plano
+public class DeleteUserService : BackgroundService  
 {
     private readonly IServiceProvider _services;
     private readonly ServiceBusProcessor _processor;
@@ -38,4 +39,13 @@ public class DeleteUserService : BackgroundService
     }
 
     private static Task ExceptionReceivedHandler(ProcessErrorEventArgs _) => Task.CompletedTask;
+
+    ~DeleteUserService() => Dispose();
+
+    public override void Dispose()
+    {
+        base.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
 }

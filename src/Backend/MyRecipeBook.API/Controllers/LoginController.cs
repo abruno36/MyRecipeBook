@@ -42,6 +42,12 @@ public class LoginController : MyRecipeBookBaseController
 
             var token = await useCase.Execute(name, email);
 
+            if (returnUrl.StartsWith("http"))
+            {
+                var uri = new Uri(returnUrl);
+                return Redirect($"{uri.GetLeftPart(UriPartial.Path)}/{token}");
+            }
+
             if (!Url.IsLocalUrl(returnUrl))
                 return Redirect("/");
 

@@ -12,6 +12,8 @@ public static class StreamImageExtensions
             result = (true, NormalizeExtension(PortableNetworkGraphic.TypeExtension));
         else if (stream.Is<JointPhotographicExpertsGroup>())
             result = (true, NormalizeExtension(JointPhotographicExpertsGroup.TypeExtension));
+        // PDF else if (stream.Is<PortableDocumentFormat>())
+        // result = (true, NormalizeExtension(PortableDocumentFormat.TypeExtension));
 
         stream.Position = 0;
 
