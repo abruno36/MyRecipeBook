@@ -1,0 +1,179 @@
+DOCKER
+
+# =============================
+#   STAGE 1 — Build
+# =============================
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copia todos os arquivos para o container
+COPY . .
+
+# Entra no diretório da API
+WORKDIR /src/src/Backend/MyRecipeBook.API
+
+# Restaura dependências
+RUN dotnet restore
+
+# Compila em modo Release
+RUN dotnet publish -c Release -o /app/publish
+
+
+# =============================
+#   STAGE 2 — Runtime (imagem pequena)
+# =============================
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+# Copia arquivos compilados do stage anterior
+COPY --from=build /app/publish .
+
+# Porta exposta
+EXPOSE 8080
+
+# Comando para iniciar a API
+ENTRYPOINT ["dotnet", "MyRecipeBook.API.dll"]
+
+Como rodar o container
+Build:
+docker build -t myrecipebook-api .
+
+Rodar:
+docker run -d -p 8080:8080 --name myrecipebook myrecipebook-api
+
+DESKTOP-CH4O4BD\SQLEXPRESS
+
+host.docker.internal,1433
+Agora acesse:
+http://localhost:8080/swagger
+
+▶ Próximo passo: rodar o container
+docker run -d -p 8080:8080 --name myrecipebook myrecipebook-api
+
+docker stop myrecipebook
+docker rm myrecipebook
+docker build -t myrecipebook .
+docker run -d -p 8080:8080 --name myrecipebook ^
+-e ConnectionStrings__DatabaseType=SqlServer ^
+-e "ConnectionStrings__ConnectionSQLServer=Server=host.docker.internal,1433;Database=meulivrodereceitas;User ID=sa;Password=root;TrustServerCertificate=True;" ^
+-e Settings__Jwt__SigningKey=MinhaChaveJWTMuitoSegura123456789! ^
+myrecipebook
+
+docker stop myrecipebook
+docker rm myrecipebook
+docker build -t myrecipebook .
+docker run -d -p 8080:8080 --name myrecipebook myrecipebook
+
+docker compose down -v
+docker compose build --no-cache
+docker compose up -d
+docker logs -f myrecipebook
+docker run --rm -it --entrypoint sh myrecipebook-api -c "cat -A /wait-for-sql.sh"
+
+docker compose down -v
+docker compose up -d
+docker logs -f myrecipebook
+
+docker compose down -v
+docker system prune -f
+docker compose up --build -d
+  
+docker logs myrecipebook
+
+URL	Resultado
+http://localhost:8080/swagger/index.html  	Funciona
+http://localhost:8080/swagger 	            geralmente redireciona para /index.html
+http://localhost:8080                   	404 (Swagger não é root, e sem controlador padrão dá Not Found)
+
+
+
+docker rmi myrecipebook-api
+docker builder prune -af
+docker compose build --no-cache
+
+derrubar o container e levantar o docker
+docker compose down -v              
+docker compose up -d --build            
+
+docker compose down --volumes
+docker compose build --no-cache
+docker compose up -d
+
+docker system prune -a --volumes -f     limpar imagens
+
+docker run --rm -it --entrypoint sh myrecipebook-api -c "which nc"
+docker run --rm -it --entrypoint sh myrecipebook-api -c "cat -A /wait-for-sql.sh"
+docker logs -f myrecipebook
+docker logs myrecipebook | findstr CONN (connection string)
+
+POST
+{
+  "name": "Teste Docker",
+  "email": "teste@docker.com",
+  "password": "SenhaDocker123@"
+}
+
+LOGIN
+{
+  "email": "teste@docker.com",
+  "password": "SenhaDocker123@" 
+}
+
+conteudo de um arquivo no container
+docker exec -it myrecipebook sh -c "cat /app/appsettings.Production.json"
+
+docker run -it --rm --network host mcr.microsoft.com/mssql-tools /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P 'MinhaSenha123' -Q "SELECT name FROM sys.databases"
+docker run -it --rm --network host mcr.microsoft.com/mssql-tools /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P 'MinhaSenha123' -d meulivrodereceitas -Q "SELECT name FROM sys.tables"
+docker run -it --rm --network host mcr.microsoft.com/mssql-tools /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P 'MinhaSenha123' -d meulivrodereceitas -Q "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='Users'"
+docker run -it --rm --network host mcr.microsoft.com/mssql-tools /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P 'MinhaSenha123' -d meulivrodereceitas -Q "SELECT TOP 50 * FROM Users"
+docker run -it --rm --network host mcr.microsoft.com/mssql-tools /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P 'MinhaSenha123' -d meulivrodereceitas -Q "SELECT TOP 50 * FROM Recipes"
+docker run -it --rm --network host mcr.microsoft.com/mssql-tools /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P 'MinhaSenha123' -d meulivrodereceitas -Q "UPDATE Users SET Id = 1 WHERE Id = 3"
+
+
+Test-NetConnection -ComputerName localhost -Port 1433
+ComputerName     : localhost
+RemoteAddress    : ::1
+RemotePort       : 1433  
+InterfaceAlias   : Loopback Pseudo-Interface 1 
+SourceAddress    : ::1
+TcpTestSucceeded : True
+
+docker compose build --no-cache
+docker compose up -d
+
+SSMS e DBveaver
+✔IMPORTANTE - todos os serviços SQL devem estar parados por causa da porta 1433
+Server: 172.28.208.1,1433
+User: sa
+Password: MinhaSenha123
+Encrypt: Optional
+Trust Server Certificate: 
+
+Teste conexão SQL fora do container
+sqlcmd -S localhost,1433 -U sa -P "MinhaSenha123" -Q "SELECT @@VERSION"
+
+
+Abrir o container como root
+docker exec -u 0 -it sqlserver bash
+
+2. Instalar mssql-tools dentro do container
+apt-get update
+apt-get install -y curl apt-transport-https gnupg
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+apt-get update
+ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+
+entrar no container
+docker run -it --rm --network host mcr.microsoft.com/mssql-tools
+
+/opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U sa -P "MinhaSenha123" -Q "SELECT SUSER_SNAME()"   ---confira a senha diretamente via sqlcmd
+/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "MinhaSenha123" -Q "SELECT @@VERSION"
+/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "MinhaSenha123" -Q "SELECT name FROM sys.databases"
+
+netstat -ano | findstr :1433
+docker ps
+Test-NetConnection -ComputerName localhost -Port 1433
+docker logs sqlserver
+docker logs -f myrecipebook
+

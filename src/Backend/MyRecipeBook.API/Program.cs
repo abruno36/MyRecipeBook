@@ -1,6 +1,5 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyRecipeBook.API.Filters;
@@ -18,122 +17,153 @@ using MyRecipeBook.Infrastructure.Migrations;
 using MyRecipeBook.Infrastructure.Services.ServiceBus;
 using MyRecipeBook.Infrastructure.Services.Storage;
 using System.Text;
-using StringConverter = MyRecipeBook.API.Converters.StringConverter;
-
-const string AUTHENTICATION_TYPE = "Bearer";
 
 var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine("ENV: " + builder.Environment.EnvironmentName);
-Console.WriteLine("AZURE: " + builder.Configuration["Settings:BlobStorage:Azure"]);
+Console.WriteLine("=== Starting API ===");
+Console.WriteLine("Environment -> " + builder.Environment.EnvironmentName);
 
-// ✅ Carregar configuração de Test
-builder.Configuration
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+// =====================================
+// CONFIG LOAD
+// =====================================
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-    options.JsonSerializerOptions.Converters.Add(new StringConverter()));
+Console.WriteLine("DB -> " + builder.Configuration["ConnectionStrings:ConnectionSQLServer"]);
+Console.WriteLine("JWT Loaded -> " + (builder.Configuration["Settings:Jwt:SigningKey"] != null));
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+// =====================================
+// SERVICES REGISTRATION
+// =====================================
+builder.Services.AddControllers(options =>
 {
-    options.OperationFilter<IdsFilter>();
-
-    options.AddSecurityDefinition(AUTHENTICATION_TYPE, new OpenApiSecurityScheme
-    {
-        Description = @"JWT Authorization header using the Bearer scheme.
-                      Enter 'Bearer {token}'.",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = AUTHENTICATION_TYPE
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = AUTHENTICATION_TYPE
-                }
-            },
-            new List<string>() }
-    });
+    options.Filters.Add<CultureActionFilter>();
+    options.Filters.Add<ExceptionFilter>();
 });
-
-builder.Services.AddMvc(options => options.Filters.Add(typeof(ExceptionFilter)));
 
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
+
 builder.Services.AddScoped<ITokenProvider, HttpContextTokenValue>();
 builder.Services.AddScoped<IDeleteUserQueue, FakeDeleteUserQueue>();
-
-builder.Services.AddSingleton(_ =>
-    new BlobServiceClient(builder.Configuration["Settings:BlobStorage:Azure"]));
-
-builder.Services.AddScoped<IBlobStorageService, AzureStorageService>();
-
 builder.Services.AddScoped<ITokenService, TokenService>();
-
-builder.Services.AddRouting(options => options.LowercaseUrls = true);
-
 builder.Services.AddHttpContextAccessor();
 
-// ✅ REGISTRA JWT (esta parte é o que faltava)
-var signingKey = builder.Configuration.GetValue<string>("Settings:Jwt:SigningKey")!;
+// =====================================
+// STORAGE SERVICE (Fake em Dev ou Docker)
+// =====================================
+var runningInContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
+if (builder.Environment.IsDevelopment()
+ || builder.Environment.EnvironmentName == "Test"
+ || runningInContainer)
+{
+    builder.Services.AddScoped<IBlobStorageService, FakeBlobStorageService>();
+}
+else
+{
+    builder.Services.AddSingleton(_ =>
+        new BlobServiceClient(builder.Configuration["Settings:BlobStorage:Azure"]));
+
+    builder.Services.AddScoped<IBlobStorageService, AzureStorageService>();
+}
+
+// =====================================
+// JWT AUTH
+// =====================================
+var jwtKey = builder.Configuration["Settings:Jwt:SigningKey"]
+             ?? throw new Exception("JWT missing in appsettings.Production.json");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    .AddJwtBearer(opt =>
     {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
+        opt.RequireHttpsMetadata = false;
+        opt.SaveToken = true;
+        opt.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
             ValidateAudience = false,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
             ClockSkew = TimeSpan.Zero
         };
     });
 
-builder.Services.AddHealthChecks().AddDbContextCheck<MyRecipeBookDbContext>();
-
-var app = builder.Build();
-
-app.MapHealthChecks("/Health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+// =====================================
+// SWAGGER
+// =====================================
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
 {
-    AllowCachingResponses = false,
-    ResultStatusCodes =
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
-        [HealthStatus.Healthy] = StatusCodes.Status200OK,
-        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
-    }
+        Title = "MyRecipeBook API",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Digite: Bearer {seu_token_jwt}"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
 });
 
-if (app.Environment.IsDevelopment())
+// =====================================
+// HEALTH
+// =====================================
+builder.Services.AddHealthChecks().AddDbContextCheck<MyRecipeBookDbContext>();
+
+// =====================================
+// BUILD APP
+// =====================================
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment() || runningInContainer)
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(o => o.RoutePrefix = "swagger");
 }
 
 app.UseMiddleware<CultureMiddleware>();
 
-app.UseHttpsRedirection();
-
-app.UseAuthentication(); 
-app.UseAuthorization();  
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
-MigrateDatabase();
+// =====================================
+// MIGRATIONS (com retry para Docker)
+// =====================================
+MigrateDatabase(app);
 
+Console.WriteLine("🚀 API RUNNING @ http://localhost:8080/swagger");
 await app.RunAsync();
 
-
-void MigrateDatabase()
+// =====================================
+// MIGRATION METHOD
+// =====================================
+void MigrateDatabase(WebApplication appInstance)
 {
     if (builder.Configuration.IsUnitTestEnviroment())
         return;
@@ -145,7 +175,5 @@ void MigrateDatabase()
     DatabaseMigration.Migrate(databaseType, connectionString, scope.ServiceProvider);
 }
 
-public partial class Program
-{
-    protected Program() { }
-}
+// Necessário para testes
+public partial class Program { }

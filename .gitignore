@@ -194,4 +194,3 @@ FakesAssemblies/
 /.sonarqube
 coverage.opencover.xml
 /mediator-flow-fixed.drawio
-appsettings.Development.json
