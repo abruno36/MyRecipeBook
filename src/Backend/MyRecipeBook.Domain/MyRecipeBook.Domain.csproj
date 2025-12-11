@@ -23,6 +23,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Services\Storage\" />
+	  <EmbeddedResource Include="Resources\*.json" />
 	</ItemGroup>
 
 </Project>

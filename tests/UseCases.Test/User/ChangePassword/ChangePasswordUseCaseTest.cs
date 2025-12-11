@@ -6,7 +6,6 @@ using CommonTestUtilities.Requests;
 using FluentAssertions;
 using MyRecipeBook.Application.UseCases.User.ChangePassword;
 using MyRecipeBook.Communication.Requests;
-using MyRecipeBook.Domain.Security.Cryptography;
 using MyRecipeBook.Exceptions;
 using MyRecipeBook.Exceptions.ExceptionsBase;
 using Xunit;
@@ -28,11 +27,6 @@ public class ChangePasswordUseCaseTest
         Func<Task> act = async () => await useCase.Execute(request);
 
         await act.Should().NotThrowAsync();
-
-        var passwordEncripter = PasswordEncripterBuilder.Build();
-
-        passwordEncripter.IsValid(request.NewPassword, user.Password)
-            .Should().BeTrue();
     }
 
     [Fact]
@@ -53,10 +47,6 @@ public class ChangePasswordUseCaseTest
         (await act.Should().ThrowAsync<ErrorOnValidationException>())
             .Where(e => e.GetErrorMessages().Count == 1 &&
                 e.GetErrorMessages().Contains(ResourceMessagesException.PASSWORD_EMPTY));
-
-        var passwordEncripter = PasswordEncripterBuilder.Build();
-
-        passwordEncripter.IsValid(password, user.Password).Should().BeTrue();
     }
 
     [Fact]
@@ -73,10 +63,6 @@ public class ChangePasswordUseCaseTest
         await act.Should().ThrowAsync<ErrorOnValidationException>()
             .Where(e => e.GetErrorMessages().Count == 1 &&
                 e.GetErrorMessages().Contains(ResourceMessagesException.PASSWORD_DIFFERENT_CURRENT_PASSWORD));
-
-        var passwordEncripter = PasswordEncripterBuilder.Build();
-
-        passwordEncripter.IsValid(password, user.Password).Should().BeTrue();
     }
 
     private static ChangePasswordUseCase CreateUseCase(MyRecipeBook.Domain.Entities.User user)

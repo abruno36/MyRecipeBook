@@ -11,7 +11,7 @@ public class TokenController : MyRecipeBookBaseController
     [ProducesResponseType(typeof(ResponseTokensJson), StatusCodes.Status200OK)]
     public async Task<IActionResult> RefreshToken(
         [FromServices] IUseRefreshTokenUseCase useCase,
-        [FromBody] RequestNewTokenJson request)
+       [FromBody] RequestNewTokenJson request)    //informações sensiveis sempre no body da requisição
     {
         var response = await useCase.Execute(request);
 

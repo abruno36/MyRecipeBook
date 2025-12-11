@@ -181,12 +181,12 @@ public static class DependencyInjectionExtension
 
         var deleteQueue = new DeleteUserQueue(client.CreateSender("user"));
 
-        var deleteUserProcessor = new DeleteUserProcessor(client.CreateProcessor("user", new ServiceBusProcessorOptions
-        {
-            MaxConcurrentCalls = 1
-        }));
+        //var deleteUserProcessor = new DeleteUserProcessor(client.CreateProcessor("user", new ServiceBusProcessorOptions
+        //{
+        //    MaxConcurrentCalls = 1
+        //}));
 
-        services.AddSingleton(deleteUserProcessor);
+        //services.AddSingleton(deleteUserProcessor);
 
         services.AddScoped<IDeleteUserQueue>(options => deleteQueue);
     }
