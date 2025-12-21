@@ -11,4 +11,5 @@ public class FilterRecipeValidator : AbstractValidator<RequestFilterRecipeJson>
         RuleForEach(r => r.Difficulties).IsInEnum().WithMessage(ResourceMessagesException.DIFFICULTY_LEVEL_NOT_SUPPORTED);
         RuleForEach(r => r.DishTypes).IsInEnum().WithMessage(ResourceMessagesException.DISH_TYPE_NOT_SUPPORTED);
     }
+
 }

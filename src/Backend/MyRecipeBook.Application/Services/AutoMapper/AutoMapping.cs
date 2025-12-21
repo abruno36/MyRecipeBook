@@ -2,6 +2,7 @@
 using MyRecipeBook.Communication.Enums;
 using MyRecipeBook.Communication.Requests;
 using MyRecipeBook.Communication.Responses;
+using MyRecipeBook.Domain.Dtos;
 using Sqids;
 
 namespace MyRecipeBook.Application.Services.AutoMapper;
@@ -57,5 +58,13 @@ public class AutoMapping : Profile
 
         CreateMap<Domain.Entities.Instruction, ResponseInstructionJson>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(source => _idEnconder.Encode(source.Id)));
+
+        CreateMap<RecipeListDto, ResponseShortRecipeJson>()
+            .ForMember(dest => dest.Id,
+                opt => opt.MapFrom(src => _idEnconder.Encode(src.Id)))
+            .ForMember(dest => dest.AmountIngredients,
+                opt => opt.MapFrom(_ => 0))
+            .ForMember(dest => dest.ImageUrl,
+                opt => opt.Ignore());
     }
 }

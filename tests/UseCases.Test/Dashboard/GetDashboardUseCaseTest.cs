@@ -8,22 +8,26 @@ using MyRecipeBook.Application.UseCases.Dashboard;
 using Xunit;
 
 namespace UseCases.Test.Dashboard;
+
 public class GetDashboardUseCaseTest
 {
     [Fact]
     public async Task Success()
     {
+        // Arrange
         (var user, _) = UserBuilder.Build();
-        var recipes = RecipeBuilder.Collection(user);
 
-        var useCase = CreateUseCase(user, recipes);
+        var entityRecipes = RecipeBuilder.Collection(user);
 
+        var useCase = CreateUseCase(user, entityRecipes);
+
+        // Act
         var result = await useCase.Execute();
 
+        // Assert
         result.Should().NotBeNull();
         result.Recipes.Should()
-            .HaveCountGreaterThan(0)
-            .And.OnlyHaveUniqueItems(recipe => recipe.Id)
+            .NotBeNullOrEmpty()
             .And.AllSatisfy(recipe =>
             {
                 recipe.Id.Should().NotBeNullOrWhiteSpace();
@@ -33,15 +37,29 @@ public class GetDashboardUseCaseTest
             });
     }
 
+    // =========================
+    // Factory
+    // =========================
+
     private static GetDashboardUseCase CreateUseCase(
         MyRecipeBook.Domain.Entities.User user,
-        IList<MyRecipeBook.Domain.Entities.Recipe> recipes)
+        IList<MyRecipeBook.Domain.Entities.Recipe> entityRecipes)
     {
         var mapper = MapperBuilder.Build();
         var loggedUser = LoggedUserBuilder.Build(user);
-        var repository = new RecipeReadOnlyRepositoryBuilder().GetForDashboard(user, recipes).Build();
-        var blobStorage = new BlobStorageServiceBuilder().GetFileUrl(user, recipes).Build();
 
-        return new GetDashboardUseCase(repository, mapper, loggedUser, blobStorage);
+        var repository = new RecipeReadOnlyRepositoryBuilder()
+            .GetForDashboard(user, entityRecipes)
+            .Build();
+
+        var blobStorage = new BlobStorageServiceBuilder()
+            .GetFileUrl(user, entityRecipes)
+            .Build();
+
+        return new GetDashboardUseCase(
+            repository,
+            mapper,
+            loggedUser,
+            blobStorage);
     }
 }

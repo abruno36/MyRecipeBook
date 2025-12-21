@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MyRecipeBook.API.Filters;
@@ -138,6 +139,12 @@ builder.Services.AddHealthChecks().AddDbContextCheck<MyRecipeBookDbContext>();
 // =====================================
 var app = builder.Build();
 
+AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+{
+    Console.WriteLine("🔥 UNHANDLED EXCEPTION");
+    Console.WriteLine(e.ExceptionObject);
+};
+
 if (app.Environment.IsDevelopment() || runningInContainer)
 {
     app.UseSwagger();
@@ -150,7 +157,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health");
+
+app.MapHealthChecks("/Health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    AllowCachingResponses = false,
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+    }
+});
 
 // =====================================
 // MIGRATIONS (com retry para Docker)

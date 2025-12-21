@@ -7,25 +7,45 @@
 		<InvariantGlobalization>false</InvariantGlobalization>
 	</PropertyGroup>
 
+	<!-- ============================= -->
+	<!--        PACKAGES API           -->
+	<!-- ============================= -->
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.10" />
+		<!-- AUTH -->
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.21" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.10" />
+
+		<!-- 🔒 JWT / IdentityModel (VERSÕES ALINHADAS) -->
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.1.2" />
+		<PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.1.2" />
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.1.2" />
+
+		<!-- HEALTH -->
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.10" />
+
+		<!-- SWAGGER -->
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
 	</ItemGroup>
 
+	<!-- ============================= -->
+	<!--        PROJECT REFERENCES     -->
+	<!-- ============================= -->
 	<ItemGroup>
 		<ProjectReference Include="..\..\Shared\MyRecipeBook.Communication\MyRecipeBook.Communication.csproj" />
 		<ProjectReference Include="..\..\Shared\MyRecipeBook.Exceptions\MyRecipeBook.Exceptions.csproj" />
 		<ProjectReference Include="..\MyRecipeBook.Application\MyRecipeBook.Application.csproj" />
 		<ProjectReference Include="..\MyRecipeBook.Infrastructure\MyRecipeBook.Infrastructure.csproj" />
 	</ItemGroup>
+
+	<!-- ============================= -->
+	<!--        APPSETTINGS            -->
+	<!-- ============================= -->
 	<ItemGroup>
-		<None Update="appsettings.Test.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		<Content Update="appsettings*.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
-	<ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="https://www.schemastore.org/appveyor.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

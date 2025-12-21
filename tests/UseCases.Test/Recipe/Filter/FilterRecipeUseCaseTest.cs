@@ -6,16 +6,20 @@ using CommonTestUtilities.Repositories;
 using CommonTestUtilities.Requests;
 using FluentAssertions;
 using MyRecipeBook.Application.UseCases.Recipe.Filter;
+using MyRecipeBook.Domain.Dtos;
+using MyRecipeBook.Domain.Enums;
 using MyRecipeBook.Exceptions;
 using MyRecipeBook.Exceptions.ExceptionsBase;
 using Xunit;
 
 namespace UseCases.Test.Recipe.Filter;
+
 public class FilterRecipeUseCaseTest
 {
     [Fact]
     public async Task Success()
     {
+        // Arrange
         (var user, _) = UserBuilder.Build();
 
         var request = RequestFilterRecipeJsonBuilder.Build();
@@ -24,8 +28,10 @@ public class FilterRecipeUseCaseTest
 
         var useCase = CreateUseCase(user, recipes);
 
+        // Act
         var result = await useCase.Execute(request);
 
+        // Assert
         result.Should().NotBeNull();
         result.Recipes.Should().NotBeNullOrEmpty();
         result.Recipes.Should().HaveCount(recipes.Count);
@@ -34,6 +40,7 @@ public class FilterRecipeUseCaseTest
     [Fact]
     public async Task Error_CookingTime_Invalid()
     {
+        // Arrange
         (var user, _) = UserBuilder.Build();
 
         var recipes = RecipeBuilder.Collection(user);
@@ -43,16 +50,23 @@ public class FilterRecipeUseCaseTest
 
         var useCase = CreateUseCase(user, recipes);
 
-        Func<Task> act = async () => { await useCase.Execute(request); };
+        // Act
+        Func<Task> act = async () => await useCase.Execute(request);
 
+        // Assert
         (await act.Should().ThrowAsync<ErrorOnValidationException>())
-            .Where(e => e.GetErrorMessages().Count == 1 &&
+            .Where(e =>
+                e.GetErrorMessages().Count == 1 &&
                 e.GetErrorMessages().Contains(ResourceMessagesException.COOKING_TIME_NOT_SUPPORTED));
     }
 
+    // =========================
+    // Helpers
+    // =========================
+
     private static FilterRecipeUseCase CreateUseCase(
-        MyRecipeBook.Domain.Entities.User user,
-        IList<MyRecipeBook.Domain.Entities.Recipe> recipes)
+           MyRecipeBook.Domain.Entities.User user,
+           IList<MyRecipeBook.Domain.Entities.Recipe> recipes)
     {
         var mapper = MapperBuilder.Build();
         var loggedUser = LoggedUserBuilder.Build(user);
@@ -61,4 +75,6 @@ public class FilterRecipeUseCaseTest
 
         return new FilterRecipeUseCase(mapper, repository, loggedUser, blobStorage);
     }
+
+
 }

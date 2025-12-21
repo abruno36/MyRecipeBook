@@ -1,6 +1,7 @@
 ﻿using MyRecipeBook.Communication.Enums;
 
 namespace MyRecipeBook.Communication.Requests;
+
 public class RequestFilterRecipeJson
 {
     public string? RecipeTitle_Ingredient { get; set; }
