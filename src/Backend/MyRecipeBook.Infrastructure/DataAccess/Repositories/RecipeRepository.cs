@@ -6,69 +6,98 @@ using MyRecipeBook.Domain.Extensions;
 using MyRecipeBook.Domain.Repositories.Recipe;
 
 namespace MyRecipeBook.Infrastructure.DataAccess.Repositories;
-public sealed class RecipeRepository : IRecipeWriteOnlyRepository, IRecipeReadOnlyRepository, IRecipeUpdateOnlyRepository
+
+public sealed class RecipeRepository :
+    IRecipeWriteOnlyRepository,
+    IRecipeUpdateOnlyRepository,
+    IRecipeReadOnlyRepository
 {
     private readonly MyRecipeBookDbContext _dbContext;
 
-    public RecipeRepository(MyRecipeBookDbContext dbContext) => _dbContext = dbContext;
+    public RecipeRepository(MyRecipeBookDbContext dbContext)
+        => _dbContext = dbContext;
 
-    public async Task Add(Recipe recipe) => await _dbContext.Recipes.AddAsync(recipe);
+    public async Task Add(Recipe recipe)
+        => await _dbContext.Recipes.AddAsync(recipe);
+
+    public void Update(Recipe recipe)
+        => _dbContext.Recipes.Update(recipe);
 
     public async Task Delete(long recipeId)
     {
         var recipe = await _dbContext.Recipes.FindAsync(recipeId);
-
         _dbContext.Recipes.Remove(recipe!);
     }
 
     public async Task<IList<Recipe>> Filter(User user, FilterRecipesDto filters)
     {
-        var query = _dbContext
-            .Recipes
+        IQueryable<Recipe> query = _dbContext.Recipes
             .AsNoTracking()
-            .Include(recipe => recipe.Ingredients)
-            .Where(recipe => recipe.Active && recipe.UserId == user.Id);
+            .Include(r => r.Ingredients)
+            .Include(r => r.DishTypes)
+            .Where(r => r.Active && r.UserId == user.Id);
 
-        if(filters.Difficulties.Any())
+        if (filters.Difficulties.Any())
         {
-            query = query.Where(recipe => recipe.Difficulty.HasValue && filters.Difficulties.Contains(recipe.Difficulty.Value));
+            query = query.Where(r =>
+                r.Difficulty.HasValue &&
+                filters.Difficulties.Contains(r.Difficulty.Value));
         }
 
         if (filters.CookingTimes.Any())
         {
-            query = query.Where(recipe => recipe.CookingTime.HasValue && filters.CookingTimes.Contains(recipe.CookingTime.Value));
+            query = query.Where(r =>
+                r.CookingTime.HasValue &&
+                filters.CookingTimes.Contains(r.CookingTime.Value));
         }
 
         if (filters.DishTypes.Any())
         {
-            query = query.Where(recipe => recipe.DishTypes.Any(dishType => filters.DishTypes.Contains(dishType.Type)));
+            query = query.Where(r =>
+                r.DishTypes.Any(d =>
+                    filters.DishTypes.Contains(
+                        (MyRecipeBook.Domain.Enums.DishType)d.Type
+                    )
+                )
+            );
         }
 
         if (filters.RecipeTitle_Ingredient.NotEmpty())
         {
-            query = query.Where(
-                recipe => recipe.Title.Contains(filters.RecipeTitle_Ingredient)
-                || recipe.Ingredients.Any(ingredient => ingredient.Item.Contains(filters.RecipeTitle_Ingredient)));
+            var text = filters.RecipeTitle_Ingredient;
+
+            query = query.Where(r =>
+                EF.Functions.Like(r.Title, $"%{text}%") ||
+                r.Ingredients.Any(i =>
+                    i.Item != null &&
+                    EF.Functions.Like(i.Item, $"%{text}%")));
         }
 
         return await query.ToListAsync(); //neste momento vai no banco de dados executar a query definida 
     }
 
-    async Task<Recipe?> IRecipeReadOnlyRepository.GetById(User user, long recipeId)
+    async Task<Recipe?> IRecipeReadOnlyRepository.GetById(
+        User user,
+        long recipeId)
     {
         return await GetFullRecipe()
-            .AsNoTracking() //desativa o tracking do Entity Framework, tornando a consulta mais rápida e leve.
-                           //É usado para consultas de leitura, quando não queremos alterar os objetos retornados.
-            .FirstOrDefaultAsync(recipe => recipe.Active && recipe.Id == recipeId && recipe.UserId == user.Id);
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r =>
+                r.Active &&
+                r.Id == recipeId &&
+                r.UserId == user.Id);
     }
 
-    async Task<Recipe?> IRecipeUpdateOnlyRepository.GetById(User user, long recipeId)
+    async Task<Recipe?> IRecipeUpdateOnlyRepository.GetById(
+        User user,
+        long recipeId)
     {
         return await GetFullRecipe()
-            .FirstOrDefaultAsync(recipe => recipe.Active && recipe.Id == recipeId && recipe.UserId == user.Id);
+            .FirstOrDefaultAsync(r =>
+                r.Active &&
+                r.Id == recipeId &&
+                r.UserId == user.Id);
     }
-
-    public void Update(Recipe recipe) => _dbContext.Recipes.Update(recipe);
 
     public async Task<IList<Recipe>> GetForDashboard(User user)
     {
@@ -84,10 +113,9 @@ public sealed class RecipeRepository : IRecipeWriteOnlyRepository, IRecipeReadOn
 
     private IIncludableQueryable<Recipe, IList<DishType>> GetFullRecipe()
     {
-        return _dbContext
-            .Recipes
-            .Include(recipe => recipe.Ingredients)
-            .Include(recipe => recipe.Instructions)
-            .Include(recipe => recipe.DishTypes);
+        return _dbContext.Recipes
+            .Include(r => r.Ingredients)
+            .Include(r => r.Instructions)
+            .Include(r => r.DishTypes);
     }
 }
